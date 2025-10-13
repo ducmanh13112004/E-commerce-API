@@ -19,7 +19,6 @@ type PromotionsHandlers interface {
 	LocalReceiveVoucherFrProgramId(*fiber.Ctx) error
 
 	//public
-	AfiliateGetProgramListFrCategoryId(*fiber.Ctx) error
 
 	//portal
 	SavePromotionHandler(ctx *fiber.Ctx) error
@@ -81,58 +80,6 @@ func (tk *promotionsHandlers) LocalReceiveVoucherFrProgramId(ctx *fiber.Ctx) err
 		}
 	}
 	return ctx.Status(http.StatusOK).JSON(resultLocal)
-}
-
-func (tk *promotionsHandlers) AfiliateGetProgramListFrCategoryId(ctx *fiber.Ctx) error {
-	defer utils.ExecTime(utils.GetTimeUTC7(), "AfiliateGetProgramListFrCategoryId", nil)
-	funcName := "AfiliateGetProgramListFrCategoryId"
-	resultFe := models.RespWeb{
-		Status: internal.SysStatus.WrongParams.Status,
-		Msg:    internal.SysStatus.WrongParams.Msg,
-	}
-	var body interface{}
-	ctx.BodyParser(&body)
-	var customer models.UserInfo
-	uri := string(ctx.Request().URI().RequestURI())
-	tokenAuth := string(ctx.Request().Header.Peek("TOKEN"))
-	startTime := time.Now()
-	internal.Log.Info(funcName, zap.Any("uri", uri), zap.Any("auth", tokenAuth), zap.Any("body", body))
-	defer func() { WebkitSendKibana(ctx, funcName, uri, tokenAuth, body, resultFe, startTime, customer) }()
-	//get info user
-	customer = models.UserInfo{
-		CustomerId:  ctx.Locals("customer_id").(string),
-		PhoneNb:     ctx.Locals("customer_phone").(string),
-		AppVersion:  ctx.Locals("app_version").(string),
-		TokenWebkit: ctx.Locals("token_webkit").(string),
-		CustomerIp:  ctx.Locals("customer_ip").(string),
-	}
-	// Handler input , validate input
-	bodyData := &models.InputAfiliateGetProgramListFrCategoryId{}
-	err := ctx.BodyParser(&bodyData)
-	if err != nil {
-		internal.Log.Error("Cannot parse", zap.Any("body", body), zap.Error(err))
-		return ctx.Status(fiber.StatusOK).JSON(resultFe)
-	}
-	validateError := models.Validate.Struct(bodyData)
-	if validateError != nil {
-		internal.Log.Error("validateError", zap.Any("input", bodyData), zap.Error(validateError))
-		return ctx.Status(http.StatusOK).JSON(internal.SysStatus.WrongParams)
-	}
-	resp, errService := tk.svc.PromotionsService.GetProgramListFrCategoryId(&customer, bodyData)
-	if errService != nil {
-		resultFe = models.RespWeb{
-			Status: errService.Status,
-			Msg:    errService.Msg,
-			Detail: errService.Detail,
-		}
-	} else {
-		resultFe = models.RespWeb{
-			Status: resp.Status,
-			Msg:    resp.Msg,
-			Detail: resp.Detail,
-		}
-	}
-	return ctx.Status(http.StatusOK).JSON(resultFe)
 }
 
 func (p *promotionsHandlers) SavePromotionHandler(ctx *fiber.Ctx) error {

@@ -13,12 +13,14 @@ type Repositories struct {
 	ProgramCategories ProgramCategoryRepo
 	ProgramProducts   ProgramProductRepo
 	ProgramDirect     ProgramDirectRepo
+	LoginApi          LoginRepo
 }
 
 func NewRepositories(
 	db *gorm.DB,
 ) *Repositories {
 	return &Repositories{
+		LoginApi:          NewLoginRepo(db),
 		ControlApi:        NewControlApiRepo(db),
 		StoreCallApi:      NewStoreCallApiRepo(db),
 		Promotions:        NewPromotionsRepo(db),

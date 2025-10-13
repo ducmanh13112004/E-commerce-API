@@ -9,6 +9,7 @@ import (
 )
 
 type LoginRepo interface {
+	GetByUserName(funcName, username string) (*models.Login, error)
 }
 
 type loginrepo struct {
