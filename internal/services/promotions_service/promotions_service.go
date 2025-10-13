@@ -5,7 +5,6 @@ import (
 	"ecom_promotion_v2/internal/models"
 	"ecom_promotion_v2/internal/repositories"
 	"ecom_promotion_v2/internal/utils"
-	"ecom_promotion_v2/internal/utils_call"
 	"fmt"
 	"strconv"
 	"strings"
@@ -17,7 +16,6 @@ import (
 
 type PromotionsService interface {
 	ReceiveVoucherFrProgramId(*models.InputReceiveVoucher) (*models.RespLocal, *internal.SystemStatus)
-	GetProgramListFrCategoryId(*models.UserInfo, *models.InputAfiliateGetProgramListFrCategoryId) (*models.RespWeb, *internal.SystemStatus)
 
 	//Portal
 	GenerateListPromotionCode(quantity int, prefix string) (interface{}, *internal.SystemStatus)
@@ -78,62 +76,6 @@ func (s *promotionsService) ReceiveVoucherFrProgramId(input *models.InputReceive
 		}, nil
 	}
 	return nil, internal.SysStatus.SystemBusy
-}
-
-func (s *promotionsService) GetProgramListFrCategoryId(customer *models.UserInfo, input *models.InputAfiliateGetProgramListFrCategoryId) (*models.RespWeb, *internal.SystemStatus) {
-	defer utils.ExecTime(utils.GetTimeUTC7(), "GetProgramListFrCategoryId", nil)
-	result, err := s.repo.Promotions.GetProgramIdFrCategoryId(input.CategoryId)
-	if err != nil {
-		internal.Log.Error("GetProgramListFrCategoryId", zap.Any("input", input), zap.Error(err))
-		return nil, internal.SysStatus.SystemError
-	}
-	response := []models.OutInfoProgram{}
-	if result != nil {
-		listProgram := result.ListProgram
-		if len(listProgram) > 0 {
-			checkCustomerType := ""
-			for index := range listProgram {
-				item := &listProgram[index]
-				if checkCustomerType != "" && item.ProgramPromotionTb.CustomerType == "FTEL" {
-					checkCustomer, errCall := s.CallGetCustomerTypeFromPhone(customer)
-					if errCall != nil {
-						return nil, errCall
-					}
-					checkCustomerType = checkCustomer
-				}
-				if item.ProgramPromotionTb != nil && (item.ProgramPromotionTb.CustomerType == "FTEL" && checkCustomerType == "FTEL" || item.ProgramPromotionTb.CustomerType != "FTEL") {
-					infoItem, err := s.AfiliateGetFullInfoProgramFrDictData(customer, item, "")
-					if err != nil {
-						return nil, internal.SysStatus.SystemError
-					}
-					response = append(response, *infoItem)
-				}
-			}
-		}
-	}
-	return &models.RespWeb{
-		Status: 1,
-		Msg:    "Success",
-		Detail: map[string]interface{}{
-			"list_program": response,
-		},
-	}, nil
-}
-func (s *promotionsService) CallGetCustomerTypeFromPhone(customer *models.UserInfo) (string, *internal.SystemStatus) {
-	defer utils.ExecTime(utils.GetTimeUTC7(), "CallGetCustomerTypeFromPhone", nil)
-
-	customerType := "NON-FTEL"
-	respContractBot, errCall := utils_call.CallGetCustomerTypeFromPhone(s.repo, customer)
-	if errCall != nil {
-		return customerType, errCall
-	}
-	for index := range respContractBot.Data {
-		item := respContractBot.Data[index]
-		if item.IsInternet == 1 {
-			customerType = "FTEL"
-		}
-	}
-	return customerType, nil
 }
 
 func (s *promotionsService) AfiliateGetFullInfoProgramFrDictData(customer *models.UserInfo, input *models.ProgramCategory, promotionCode string) (*models.OutInfoProgram, error) {

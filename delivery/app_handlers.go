@@ -28,6 +28,7 @@ type AppHandlers interface {
 	ProgramDirectHandlers
 	TelegramHandlers
 	ProgramRedirectChannelHandlers
+	LoginHandlers
 }
 
 type appHandlers struct {
@@ -40,7 +41,7 @@ type appHandlers struct {
 	ProgramProductHandlers
 	ProgramDirectHandlers
 	TelegramHandlers
-
+	LoginHandlers
 	ProgramRedirectChannelHandlers
 }
 
@@ -55,6 +56,7 @@ func NewAppHandlers(appService *services.AppServices, rdb *redis.Client) AppHand
 		NewProgramProductHandlers(appService),
 		NewProgramDirectHandlers(appService),
 		NewTelegramHandlers(),
+		NewLoginHandlers(appService),
 		NewProgramRedirectHandlers(appService),
 	}
 }

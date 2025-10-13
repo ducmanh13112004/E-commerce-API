@@ -399,9 +399,9 @@ func CheckSQLDB() (*gorm.DB, error) {
 func NewConnectRedis() *redis.Client {
 	fmt.Println("NewConnectRedis start...")
 	client := redis.NewClient(&redis.Options{
-		Addr:     "ISP-REDIS:36380",
-		Password: "ISC_Redis!123", // no password set
-		DB:       15,              // use default DB
+		Addr:     "...",
+		Password: "....", // no password set
+		DB:       15,     // use default DB
 	})
 	fmt.Println("NewConnectRedis SUCCESS")
 	return client
@@ -588,47 +588,23 @@ func InitKeys(isProduction bool) *AppKeys {
 	keys := &AppKeys{
 		HIFPT_ECOM_CLIENT_KEY:   "hifpt_ecom",
 		HIFPT_ECOM_SECRET_KEY:   "xxxxxxecom2021",
-		NotifyTemplateClientKey: "webkitewor8380fvni239f0q123nf0nf",
+		NotifyTemplateClientKey: "ẻyerydbsdbfgsdfguweruwqere",
 		NotifyTemplateSecretKey: "iofgkcugysdpfekfdgdfgertxcvsdf",
 		ClientIdSercretKey: map[string]string{
-			"19b5d0a92a4e4320951aa90b7ddadd31": "3a30b632c51947279563c1bea1993326",
+			"rtert345634erger64563": "346534gergdfgdfghdf",
 		},
-		TokenSecretKeyMiniApp: "aXzJhwhkbcBsBQaXzJhwhkbcBsBQ710sD0iD9613VHAuzm710sD0iD9613VHAuzm",
-		TOKEN_SECRET_KEY_APP:  "aXzJlkmvdtBsBQ710sD0iD5978VHAuzm",
-		TOKEN_SECRET_KEY_WEB:  "FCONNECT2_hehelilifsdfjjfjglilieiruwoeiurMsIjH",
+		TokenSecretKeyMiniApp: "45fgedfg45t645dfgđfasrshfgjhfgtw",
+		TOKEN_SECRET_KEY_APP:  "45dftfdgdffgdfgdgdfgdfqwerqwer",
+		TOKEN_SECRET_KEY_WEB:  "ư435erfdgdfyrterdfgasdwedqr",
 
-		TOKEN_SECRET_KEY_PORTAL: "WEBPORTAL_ZGOSio5UAkEallc5EWYfP9Ds73VnzJot", //
-		X_API_KEY_TELEGRAM:      "01JQWYRG09AGBE8V0GSQAH9ZP1",                 //
+		TOKEN_SECRET_KEY_PORTAL: "345uwdgweugu23yqwiopqwheuguge", //
+		X_API_KEY_TELEGRAM:      "wi4y23tfwdadgfywegfyug",        //
 		TokenKeyHiChatBot:       "111229000-daa7-4128-8f1e-d022ebff3ba0",
 		TokenKeyHiBotTelegram:   "7973811607:AAEXPokFoDjZaGxu0YAhQQPk1ZGnwDj7YWQ", // token telegram
 		TOKEN_TELEGRAM:          "7521748926:AAG4MCZ0i0sB-uRP-tuAAViViAeD74kh9Rs",
-		NotifyProviderClientKey: "webkitewor8380fvni239f0q123nf0nf",
+		NotifyProviderClientKey: "ẻyerydbsdbfgsdfguweruwqere",
 		CustomerSopClientKey: `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA27UGFyP0m6LSENLyzpUhyX6aPcUbp3fZCtTP4EKSrmiwsPob
-Ehgk0LbFlcrHCYT6ZGRRGx5U6wicqrnaxCTc6f6+iJ26ori+H0xeC/DSm3+Ur5KM
-0LQort0oz6DGePX0oUklj/nzmrh0psxNCyFy+qf9oIhnMBvgg3CO+wg2wSGswXI2
-uBGdSObLKzu6vrcjISJIcbjNBqpYTs+zYWxisgMeuMCsUvoNwsTms8lVSteBxTQq
-b2G+hGxNazmEUEDO6kkiQQ+5t0yCw0FV2BBlqMzd4j5P8MwM483qos8Mq0bTkyXU
-uH3M9BlAw78/ojw+4l9DGZFIsU1WK6YEGKNZZwIDAQABAoIBAQC571ZLKSOuvzm2
-AUB5ch5Y7urL0c8YiEXHc9jE+rI2JeU6sT9Nrd8iPzuyDB0rwj1BzuAQ6jeFfRFR
-Lt6kVmobIXrQFWRIp75GsJN62YDzFiKX/5dqXL19Vy9dn7u3zLcN8+B1G1x9GROn
-wYiGHfW3iYoMXMOvJDh6JDzs18O25x1s1p9SL99y3eSUe363G2G9URSp98tovLaa
-PSQbXsurD4jsxBsnJuRX/XVr4FV9unhv2aGvWylUtZF1LOBS+PjVOf+/8tfcbAnY
-/gG6vKf+XlcDXCcegZjAC0fFlTj4DFhrcqP6dP8OIItvs6PG897pBCe+JEhRjyez
-rs14g8KZAoGBAN0dREUo0XR2MjAul9PZcd0eglgXt/3PTA0Fb560piOgEkwMjcSg
-lDZ8p9UC//0cuGvZUcNxGmutXDwkDEH+H9/fTa7DA2//BPaZxOcke+W5p9e7YP0e
-TkPzJv7ymAh9j6vx1Clh28De0Hb/k/0YONJfF53Ct8b/n0EG9jXqBvclAoGBAP5e
-67sU2wDx2JGdg+CbMpN2gdElCTetFhk4b9nZpgm0Qn42n4yu+jXAwzfbLZmju+cm
-L1IATQ2Ymo0fbyVOql8WfWt60tGjB4Dp2agj62jpNkCs74tHPxylsW5yZHNcLO+R
-pgKDtb6eEUlXwoqjWI06tjFXSul4JwkY2+hY0f6bAoGBAKW8QSbhoJX93kKVOgJ2
-E03dh2/GX4gkMGn2MCMyXvGHEw/jvQOsJUvuBdK5S+2J8IYOP6YSCe6548/EaVex
-xmyEsXKUA+iXqz24Jonmo+OeVDt03Q78/0cZY5pndiOvEdidDBz0l8YqfPElQuTL
-mhO9aTM794p2ogUY1cW1pADtAoGAKW/lDtDS7FB5ax8xwIEHuCXx99QEsGEt3GXp
-Mp/WAHaw7kaPrydB80e3hX3a69BUZ888nisWYkSdyKd6P6WU83CCdePIPAZGzqVJ
-o65WRvzWrap+Sz4L9eq4ALn5yyEU4OHlHTu/e5HcVwpI0rTRVBBgZaFGvsmn8j9u
-c2ckrkkCgYAiSBxBABO4LFhyYZJZwK37Mi+fLmH32Uge4KuZ2uuyzXJFXCFyE0HK
-/jpixxI9mpzbL0bzT/914mZFVH9Swwu33AG0WKPRDgmZ2wRyelYSkqiFN7rXhFtx
-yEaMGoywcPk46GY2K4hgK3LPVK6OapI3pSiGgOckvhGWMU1OwJGvZA==
+dfdgdfgdfgdfgdfgdfgdfgdfgdfgertertert
 -----END RSA PRIVATE KEY-----`,
 		HeaderAuthLoyalty:                   "aGlmcHQ6S09hRTZuelVpYmRnbmpHUVhiQnpPanhI",
 		HeaderAuthLoyaltyConsumeCoinsPhase2: "aGlmcHQtY29uc3VtZS1jb2lucy1waGFzZTI6NVMwNkYybmNDWndzOXkwUUFkMXQ0QlRRMDFHT3Y5bHE=",
@@ -723,21 +699,6 @@ func (TempLog) Error(msg string, fields ...zap.Field) {
 	Logger.Error(msg, fields...)
 	fmt.Println()
 }
-
-// func (TempLog) ErrorTelegram(msg string, fields ...zap.Field) {
-// 	pc, file, line, _ := runtime.Caller(1)
-// 	fn := runtime.FuncForPC(pc)
-// 	listString := strings.Split(file, ServiceName+"/")
-// 	file = shortCaller(listString[len(listString)-1])
-// 	caller := fmt.Sprintf("%v %v:%v", shortFuncNameCaller(fn.Name()), file, line)
-// 	SendLogToKibana("ERROR", msg, caller, fields...)
-// 	fields = append(fields, zap.Any("caller", caller))
-// 	Logger.Error(msg, fields...)
-// 	fmt.Println()
-// 	mapMessage := ZapFieldToMap("ERROR", msg, caller, fields...)
-// 	byteMessage, _ := json.Marshal(mapMessage)
-// 	SendMessageTeleGram("WARNING\n" + string(byteMessage))
-// }
 
 func ZapFieldToMap(logLevel, msg string, caller interface{}, fields ...zapcore.Field) map[string]interface{} {
 	Message := map[string]interface{}{

@@ -157,7 +157,7 @@ func PromotionsGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fib
 	AppServer.Post("/hi-ecom-promotion-v2-api/v1/promotion/receive-voucher-fr-program-id", appHandler.RequireTokenLocal, appHandler.LocalReceiveVoucherFrProgramId)
 
 	// Danh sách chương trình theo danh mục
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/promotion/get-program-list-fr-category-id", appHandler.RequireTokenWeb, appHandler.AfiliateGetProgramListFrCategoryId)
+
 	return AppServer
 }
 
