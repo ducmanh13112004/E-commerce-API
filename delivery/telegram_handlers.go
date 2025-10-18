@@ -4,7 +4,6 @@ import (
 	"ecom_promotion_v2/internal"
 	"ecom_promotion_v2/internal/models"
 	"ecom_promotion_v2/internal/utils"
-	"ecom_promotion_v2/internal/utils_call"
 	"net/http"
 	"time"
 
@@ -57,7 +56,7 @@ func (t *telegramHandlers) BotTelegramHandlers(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(internal.SysStatus.WrongParams)
 	}
 
-	err = utils_call.CallSendMessageTelegram(bodyData.Message)
+	// err = utils_call.CallSendMessageTelegram(bodyData.Message)
 	if err != nil {
 		internal.Log.Error("Send telegram message failed",
 			zap.String("func", funcName),
@@ -106,7 +105,7 @@ func (t *telegramHandlers) BotTelegramLibraryHandlers(ctx *fiber.Ctx) error {
 		resultFe.Status = internal.SysStatus.SystemError.Status
 		return ctx.Status(http.StatusOK).JSON(resultFe)
 	}
-	err = utils.ForwardMessage(bodyData)
+	// err = utils.ForwardMessage(bodyData)
 	if err != nil {
 		resultFe.Msg = "Gửi tin nhắn thất bại"
 		resultFe.Status = internal.SysStatus.SystemError.Status

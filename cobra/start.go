@@ -6,9 +6,13 @@ import (
 	"ecom_promotion_v2/internal/models"
 	"ecom_promotion_v2/internal/repositories"
 	"ecom_promotion_v2/internal/services"
-	"ecom_promotion_v2/internal/utils"
 	"encoding/json"
 	"fmt"
+	"os"
+	"runtime"
+	"runtime/debug"
+	"time"
+
 	"github.com/go-co-op/gocron"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -18,10 +22,6 @@ import (
 	fiber_pprof "github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"os"
-	"runtime"
-	"runtime/debug"
-	"time"
 )
 
 func FreeOSMemory() {
@@ -43,8 +43,8 @@ var rootCmd = &cobra.Command{
 
 		go FreeOSMemory()
 		// app setting
-		utils.StartTelegramService()
-		go utils.SendTelegramMessage("Start "+internal.Envs.HostName, 1)
+		// utils.StartTelegramService()
+		// go utils.SendTelegramMessage("Start "+internal.Envs.HostName, 1)
 		// utils_call.UploadFramedImage("test.jpg", "9291918.png", "output/output.png", "miniotests")
 
 		repositories := repositories.NewRepositories(internal.Db.Debug())
@@ -191,16 +191,4 @@ func Execute() {
 		os.Exit(1)
 	}
 
-}
-func init() {
-	os.Setenv("TZ", "Asia/Ho_Chi_Minh")
-	if internal.Envs.IsDev {
-		internal.Log.Info("Dev mode")
-		os.Setenv("NO_PROXY", "*.fpt.net, *.isc.net, *.fpt.vn")
-		os.Setenv("HTTP_PROXY", "http://proxy.hcm.fpt.vn:80")
-		os.Setenv("HTTPS_PROXY", "http://proxy.hcm.fpt.vn:80")
-		os.Setenv("no_proxy", "*.fpt.net, *.isc.net, *.fpt.vn")
-		os.Setenv("http_proxy", "http://proxy.hcm.fpt.vn:80")
-		os.Setenv("https_proxy", "http://proxy.hcm.fpt.vn:80")
-	}
 }

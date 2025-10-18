@@ -5,14 +5,12 @@ import (
 	"ecom_promotion_v2/internal/models"
 	"ecom_promotion_v2/internal/repositories"
 	"ecom_promotion_v2/internal/utils"
-	"ecom_promotion_v2/internal/utils_call"
-	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
 )
 
-var BotTelegram utils_call.BotTelegramService
+// var BotTelegram utils_call.BotTelegramService
 
 type CategoryService interface {
 	CreateCategory(*models.CategoryTb) *internal.SystemStatus
@@ -62,21 +60,21 @@ func (s *categoryService) CreateCategory(category *models.CategoryTb) *internal.
 				zap.String("category_name", category.CategoryName),
 				zap.Error(err),
 			)
-			go utils_call.SendStatusMessage(
-				fmt.Sprintf("❌ Lỗi cơ sở dữ liệu khi tạo danh mục: %s \n User: %s, ID: %d", category.CategoryName, category.UpdateBy, category.CategoryId),
-				3)
-			return &internal.SystemStatus{
-				Status: internal.CODE_SYSTEM_ERROR,
-				Msg:    "Database error occurred",
-				Detail: err.Error(),
-			}
+			// go utils_call.SendStatusMessage(
+			// 	fmt.Sprintf("❌ Lỗi cơ sở dữ liệu khi tạo danh mục: %s \n User: %s, ID: %d", category.CategoryName, category.UpdateBy, category.CategoryId),
+			// 	3)
+			// return &internal.SystemStatus{
+			// 	Status: internal.CODE_SYSTEM_ERROR,
+			// 	Msg:    "Database error occurred",
+			// 	Detail: err.Error(),
+			// }
 		}
 
 		// Thông báo lỗi tạo danh mục thất bại
-		go utils_call.SendStatusMessage(
-			fmt.Sprintf("⚠️ Tạo danh mục thất bại: %v \n User: %s, ID: %d", err, category.UpdateBy, category.CategoryId),
-			2,
-		)
+		// go utils_call.SendStatusMessage(
+		// 	fmt.Sprintf("⚠️ Tạo danh mục thất bại: %v \n User: %s, ID: %d", err, category.UpdateBy, category.CategoryId),
+		// 	2,
+		// )
 		return internal.SysStatus.SystemError
 	}
 
@@ -85,10 +83,10 @@ func (s *categoryService) CreateCategory(category *models.CategoryTb) *internal.
 		zap.String("funcName", funcName),
 		zap.Any("input", category),
 	)
-	go utils_call.SendStatusMessage(
-		fmt.Sprintf("✅ Danh mục mới vừa được thêm: %s \n User: %s, ID: %d", category.CategoryName, category.UpdateBy, category.CategoryId),
-		1,
-	)
+	// go utils_call.SendStatusMessage(
+	// 	fmt.Sprintf("✅ Danh mục mới vừa được thêm: %s \n User: %s, ID: %d", category.CategoryName, category.UpdateBy, category.CategoryId),
+	// 	1,
+	// )
 	return nil
 }
 

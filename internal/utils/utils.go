@@ -1,20 +1,16 @@
 package utils
 
 import (
-	"crypto"
 	"crypto/aes"
 	"crypto/hmac"
 	"crypto/md5"
 	cryptoRand "crypto/rand"
-	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509"
 	"ecom_promotion_v2/internal"
 	"ecom_promotion_v2/internal/models"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"encoding/pem"
 	"errors"
 	"fmt"
 	"math"
@@ -115,22 +111,12 @@ func GetSha256(data string) string {
 	sha := hex.EncodeToString(h.Sum(nil))
 	return sha
 }
-func CreateFsafeToken(FsafeClientKey, FsafeSecretKey string) string {
-	timestr := GetStringTimeUTC7("Y-D-M")
-	return FsafeSecretKey + "::" + GetMD5Hash(FsafeClientKey+"::"+FsafeSecretKey+timestr)
-}
-func CreateHiPyamentToken(ClientKey, SecretKey string) string {
-	timestr := GetStringTimeUTC7("Y-D-M")
-	return ClientKey + "::" + GetMD5Hash(ClientKey+"::"+SecretKey+timestr)
-}
+
 func CreateEcomToken(EcomClientKey, EcomSecretKey string) string {
 	timestr := GetStringTimeUTC7("Y-D-M")
 	return GetMD5Hash(EcomClientKey + "::" + EcomSecretKey + timestr)
 }
-func CreateEcomTokenV2() string {
-	timestr := GetStringTimeUTC7("Y-D-M")
-	return GetMD5Hash(internal.Keys.HIFPT_ECOM_CLIENT_KEY + "::" + internal.Keys.HIFPT_ECOM_SECRET_KEY + timestr)
-}
+
 func CreateNotifyToken(NotifyClientKey, NotifySecretKey string) string {
 	timestr := GetStringTimeUTC7("Y-D-M")
 	return GetMD5Hash(NotifyClientKey + "::" + NotifySecretKey + timestr)
@@ -173,27 +159,6 @@ func CreateFconnectToken(FCONNECT_CLIENT_KEY string) string {
 	return GetMD5Hash(FCONNECT_CLIENT_KEY + GetStringTimeUTC7("Y-M-D"))
 }
 
-func CreateNotifyTemplateToken() string {
-	timestr := GetStringTimeUTC7("Y-D-M")
-	return GetMD5Hash(internal.Keys.NotifyTemplateClientKey + "::" + internal.Keys.NotifyTemplateSecretKey + timestr)
-}
-
-func CreateCustomerSopToken() string {
-	block, _ := pem.Decode([]byte(internal.Keys.CustomerSopClientKey))
-	if block == nil || block.Type != "RSA PRIVATE KEY" {
-		return ""
-	}
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return ""
-	}
-	hashed := sha256.Sum256([]byte("SOP~>1H*5d"))
-	signature, err := rsa.SignPKCS1v15(cryptoRand.Reader, key, crypto.SHA256, hashed[:])
-	if err != nil {
-		return ""
-	}
-	return base64.StdEncoding.EncodeToString(signature)
-}
 func CheckRegexFrType(input string, regexType string) bool {
 	var sampleRegexp *regexp.Regexp
 	sampleRegexp = regexp.MustCompile(regexType)
@@ -759,29 +724,6 @@ func GetDataRedisFrKey(rdb redis.Client, key string) (*models.RedisModel, string
 		return result, val2, nil
 	}
 }
-func VerifyTokenApp(tokenTest string) (string, *internal.SystemStatus) {
-	clams := jwt.MapClaims{}
-	decodeToken, err := jwt.ParseWithClaims(tokenTest, clams, func(t *jwt.Token) (interface{}, error) {
-		return []byte(internal.Keys.TOKEN_SECRET_KEY_APP), nil
-	})
-	if err != nil {
-		jwtErr := err.(*jwt.ValidationError).Errors
-		if jwtErr == jwt.ValidationErrorExpired {
-			internal.Log.Error("ValidationErrorExpired ", zap.Any("tokenParse", decodeToken), zap.Error(err))
-			return "", internal.SysStatus.TokenExpired
-		}
-	}
-	if decodeToken == nil || !decodeToken.Valid {
-		internal.Log.Error("Token Valid", zap.Any("tokenParse", decodeToken))
-		return "", internal.SysStatus.InvalidToken
-	}
-	token, ok := clams["jti"].(string)
-	if !ok {
-		internal.Log.Error("clams: jti does not exit", zap.Any("data", clams))
-		return "", internal.SysStatus.InvalidToken
-	}
-	return token, nil
-}
 
 func ExecTime(start time.Time, funcName string, log *zap.Logger) {
 	logStr := fmt.Sprintf("ExecTime dt=%d ms", GetTimeUTC7().Sub(start).Milliseconds())
@@ -852,71 +794,6 @@ func GetFunctionName() string {
 	// Chia tên hàm và lấy phần cuối cùng
 	parts := strings.Split(funcName, ".")
 	return parts[len(parts)-1]
-}
-
-func GetRedisModelFromRedis(rdb *redis.Client, tokenApp string, funcName string) (*models.RedisModel, error) {
-	tokenStr := strings.Replace(tokenApp, "Bearer ", "", 1)
-	// Check redis connection
-	_, err := rdb.Ping().Result()
-	if err != nil {
-		internal.Log.Error("Ping redis", zap.Error(err), zap.Any("funcName", funcName))
-		return nil, err
-	}
-
-	// Parse JWT token
-	claims := jwt.MapClaims{}
-	decodeToken, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(internal.Keys.TOKEN_SECRET_KEY_APP), nil
-	})
-	if err != nil {
-		jwtErr := err.(*jwt.ValidationError).Errors
-		if jwtErr == jwt.ValidationErrorExpired {
-			internal.Log.Error("ValidationErrorExpired ", zap.Any("funcName", funcName), zap.Any("tokenParse", decodeToken), zap.Any("tokenApp", tokenApp), zap.Error(err))
-			return nil, err
-		}
-	}
-	if decodeToken == nil {
-		internal.Log.Error("Token Valid", zap.Any("funcName", funcName), zap.Any("tokenParse", decodeToken), zap.Any("tokenApp", tokenApp))
-		return nil, err
-	}
-	token, ok := claims["jti"].(string)
-	if !ok {
-		internal.Log.Error("claims: jti does not exit", zap.Any("funcName", funcName), zap.Any("data", claims))
-		return nil, err
-	}
-	clientId, ok := claims["clientId"].(string)
-	if !ok {
-		clientId = "session"
-	}
-
-	// Get data from Redis
-	redisKey := fmt.Sprintf("%s:%s", clientId, token)
-	redisModel := &models.RedisModel{}
-	redisValue, err := rdb.Get(redisKey).Result()
-	if err == redis.Nil {
-		internal.Log.Info("Token does not exist", zap.Any("funcName", funcName), zap.Any("Token", redisKey))
-		return nil, err
-	} else if err != nil {
-		internal.Log.Error("Redis error", zap.Any("funcName", funcName), zap.Error(err))
-		return nil, err
-	} else {
-		dat := []byte(redisValue)
-		out, err := gophp.Unserialize(dat)
-		if err != nil {
-			internal.Log.Error("gophp.Unserialize(dat)", zap.Any("funcName", funcName), zap.Any("data", dat), zap.Error(err))
-			return nil, err
-		}
-		jsonbody, err := json.Marshal(out)
-		if err != nil {
-			internal.Log.Error("json.Marshal(out) ", zap.Any("funcName", funcName), zap.Any("data", out), zap.Error(err))
-			return nil, err
-		}
-		if err := json.Unmarshal(jsonbody, &redisModel); err != nil {
-			internal.Log.Error("json.Unmarshal(jsonbody) ", zap.Any("funcName", funcName), zap.Any("data", jsonbody), zap.Error(err))
-			return nil, err
-		}
-	}
-	return redisModel, nil
 }
 
 func ResponseString(resp *resty.Response) interface{} {
