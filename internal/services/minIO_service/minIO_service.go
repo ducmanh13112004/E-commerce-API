@@ -141,7 +141,7 @@ func handleMinIOError(objectType, objectName, funcName string, err error) (strin
 		zap.String("objectName", objectName),
 		zap.Error(err),
 	)
-	go utils_call.SendStatusMessage(fmt.Sprintf("❌ Lỗi lấy object %s: %v", objectName, err), 3)
+	// go utils_call.SendStatusMessage(fmt.Sprintf("❌ Lỗi lấy object %s: %v", objectName, err), 3)
 
 	return "", &internal.SystemStatus{
 		Status: internal.CODE_SYSTEM_ERROR,
@@ -167,7 +167,7 @@ func handleSystemError(msg, funcName string, err error) (string, *internal.Syste
 		zap.String("funcName", funcName),
 		zap.Error(err),
 	)
-	go utils_call.SendStatusMessage(fmt.Sprintf("❌ %s: %v", msg, err), 3)
+	// go utils_call.SendStatusMessage(fmt.Sprintf("❌ %s: %v", msg, err), 3)
 
 	return "", &internal.SystemStatus{
 		Status: internal.CODE_SYSTEM_ERROR,

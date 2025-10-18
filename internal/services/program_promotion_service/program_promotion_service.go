@@ -221,11 +221,11 @@ func (p *programPromotionService) CreateProgramPromotion(promotion *models.Creat
 	}
 	resp, err := p.repo.ProgramPromotions.CreateProgramPromotion(programPromotion, promotion.ListChannel)
 	if err != nil {
-		go utils.SendTelegramMessage(fmt.Sprintf("Thêm chương trình khuyến mại thất bại!\nUser: %s - ID: %s", updateBy, strconv.FormatInt(resp, 10)), 2)
+		// go utils.SendTelegramMessage(fmt.Sprintf("Thêm chương trình khuyến mại thất bại!\nUser: %s - ID: %s", updateBy, strconv.FormatInt(resp, 10)), 2)
 		internal.Log.Error("Error create program", zap.Any("funcName", funcName), zap.Any("input", promotion), zap.Error(err))
 		return nil, internal.SysStatus.SystemError
 	}
-	go utils.SendTelegramMessage(fmt.Sprintf("Chương trình khuyến mại mới vừa được thêm\nUser: %s - ID: %s", updateBy, strconv.FormatInt(resp, 10)), 1)
+	// go utils.SendTelegramMessage(fmt.Sprintf("Chương trình khuyến mại mới vừa được thêm\nUser: %s - ID: %s", updateBy, strconv.FormatInt(resp, 10)), 1)
 	internal.Log.Info("Success create program", zap.Any("funcName", funcName), zap.Any("input", promotion), zap.Any("output", resp))
 	return resp, nil
 }

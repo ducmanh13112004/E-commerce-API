@@ -45,8 +45,8 @@ var (
 	KafkaTopicName     = NewKafkaTopicName(Envs.IsProduction)
 	KafkaTopicPartner  = NewKafkaTopicPartner(Envs.IsProduction)
 	KafkaTopicNameAll  = NewKafkaTopicNameAll(Envs.IsProduction)
-	FROM_EMAIL         = "HiFPTsupport@fpt.com"
-	URL_SEND_MAIL_SMTP = "http://systemmailapi.fpt.vn/api/SendMailSMTP/InsertInfoSendMailSMTP"
+	FROM_EMAIL         = "...."
+	URL_SEND_MAIL_SMTP = "....."
 	ServiceName        = "hi-ecom-promotion-v2-api"
 )
 
@@ -451,43 +451,23 @@ func NewConnectRedisCache() *redis.Client {
 }
 
 func NewBrokers(useProduction bool) []string {
-	if Envs.IsDev {
-		return []string{"kafka-1:19092", "kafka-2:29092", "kafka-3:39092"}
-	}
-	if useProduction {
-		return []string{"isc-kafka01:9092", "isc-kafka02:9092", "isc-kafka03:9092"}
-	}
-	return []string{"isc-kafka01:9092", "isc-kafka02:9092", "isc-kafka03:9092"}
+
+	return []string{""}
 }
 
 func NewKafkaTopicName(useProduction bool) string {
-	if Envs.IsDev {
-		return "dev-hifpt-all-in-one-kafka"
-	}
-	if useProduction {
-		return "hifpt-hi-ecom-logs"
-	}
-	return "stag-hifpt-hi-ecom-logs"
+
+	return ""
 }
 
 func NewKafkaTopicPartner(useProduction bool) string {
-	if Envs.IsDev {
-		return "dev-hifpt-all-in-one-kafka"
-	}
-	if useProduction {
-		return "hifpt-hi-partner-api"
-	}
-	return "stag-hifpt-hi-partner-api"
+
+	return ""
 }
 
 func NewKafkaTopicNameAll(useProduction bool) string {
-	if Envs.IsDev {
-		return "dev-hifpt-all-in-one-kafka"
-	}
-	if useProduction {
-		return "hifpt-all-in-one-kafka"
-	}
-	return "stag-hifpt-all-in-one-kafka"
+
+	return ""
 }
 
 func InitAPIDomains(isProduction bool) *ApiDomains {
