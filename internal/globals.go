@@ -37,7 +37,7 @@ var (
 var (
 	Domains            = InitAPIDomains(Envs.IsProduction)
 	Eps                = InitAPIEndpoints()
-	Keys               = InitKeys(Envs.IsProduction)
+	Keys               = (Envs.IsProduction)
 	Pool               = NewThreadPool()
 	PoolLog            = NewThreadPool()
 	RedisCache         = NewConnectRedisCache()
@@ -45,8 +45,8 @@ var (
 	KafkaTopicName     = NewKafkaTopicName(Envs.IsProduction)
 	KafkaTopicPartner  = NewKafkaTopicPartner(Envs.IsProduction)
 	KafkaTopicNameAll  = NewKafkaTopicNameAll(Envs.IsProduction)
-	FROM_EMAIL         = "HiFPTsupport@fpt.com"
-	URL_SEND_MAIL_SMTP = "http://systemmailapi.fpt.vn/api/SendMailSMTP/InsertInfoSendMailSMTP"
+	FROM_EMAIL         = "...."
+	URL_SEND_MAIL_SMTP = "....."
 	ServiceName        = "hi-ecom-promotion-v2-api"
 )
 
@@ -191,9 +191,9 @@ type GroupLoyaltyApi struct {
 	VoucherExchangeDetail string
 }
 type ApiEndpoints struct {
-	HiFPTApi           GroupHiFPTApi
-	InSideAPI          GroupInSideAPI
-	HiPayment          GroupHiPaymentAPI
+	HiFPTApi  GroupHiFPTApi
+	InSideAPI GroupInSideAPI
+
 	OnlineReceipt      GroupOnlineReceipt
 	LocalNotiProvider  GroupLocalSendNoti
 	HiCustomerProvider GroupHiCustomerProvider
@@ -451,169 +451,46 @@ func NewConnectRedisCache() *redis.Client {
 }
 
 func NewBrokers(useProduction bool) []string {
-	if Envs.IsDev {
-		return []string{"kafka-1:19092", "kafka-2:29092", "kafka-3:39092"}
-	}
-	if useProduction {
-		return []string{"isc-kafka01:9092", "isc-kafka02:9092", "isc-kafka03:9092"}
-	}
-	return []string{"isc-kafka01:9092", "isc-kafka02:9092", "isc-kafka03:9092"}
+
+	return []string{""}
 }
 
 func NewKafkaTopicName(useProduction bool) string {
-	if Envs.IsDev {
-		return "dev-hifpt-all-in-one-kafka"
-	}
-	if useProduction {
-		return "hifpt-hi-ecom-logs"
-	}
-	return "stag-hifpt-hi-ecom-logs"
+
+	return ""
 }
 
 func NewKafkaTopicPartner(useProduction bool) string {
-	if Envs.IsDev {
-		return "dev-hifpt-all-in-one-kafka"
-	}
-	if useProduction {
-		return "hifpt-hi-partner-api"
-	}
-	return "stag-hifpt-hi-partner-api"
+
+	return ""
 }
 
 func NewKafkaTopicNameAll(useProduction bool) string {
-	if Envs.IsDev {
-		return "dev-hifpt-all-in-one-kafka"
-	}
-	if useProduction {
-		return "hifpt-all-in-one-kafka"
-	}
-	return "stag-hifpt-all-in-one-kafka"
+
+	return ""
 }
 
 func InitAPIDomains(isProduction bool) *ApiDomains {
 	// productiongit puk
 	if isProduction {
 		return &ApiDomains{
-			HiFPT:             "http://hifpt-api.fpt.vn",
-			HiFptNet:          "https://hifpt-api.fpt.net",
-			HiFPTWebkit:       "https://hi.fpt.vn",
-			HiPayment:         "http://hi-payment.fpt.vn",
-			OnlineReceipt:     "http://onlinereceipt.fpt.vn",
-			ShoppingV1:        "http://hi-ecom-shopping-api:9001",
-			Billing:           "http://hi-ecom-billing-api:9004",
-			Promotion:         "http://hi-ecom-promotion-api:9003",
-			HiURLNotify:       "http://hi-customer.fpt.vn",
-			FPTPayment:        "https://fpt.vn",
-			LocalNotiProvider: "http://hi-notify-provider",
-			HrAPI:             "http://hrapi.fpt.vn",
-			CustomerSop:       "http://customer-soppro.ftel.scc",
-			Loyalty:           "https://loyaltyapi.fpt.net",
+			//....
 		}
 	}
 	// staging
 	return &ApiDomains{
-		HiFPT:             "http://hifpt-api-stag.fpt.vn",
-		HiFptNet:          "https://hifpt-api-stag.fpt.net",
-		HiFPTWebkit:       "https://staging-hi.fpt.vn",
-		HiPayment:         "http://hi-payment-stag.fpt.vn",
-		OnlineReceipt:     "http://onlinereceiptstag.fpt.vn",
-		ShoppingV1:        "http://hi-ecom-shopping-api-staging:9001",
-		Billing:           "http://hi-ecom-billing-api-staging:9004",
-		Promotion:         "http://hi-ecom-promotion-api-staging:9003",
-		HiURLNotify:       "http://hi-customer-stag.fpt.vn",
-		FPTPayment:        "https://staging.fpt.vn",
-		LocalNotiProvider: "http://hi-notify-provider-staging",
-		HrAPI:             "http://hrapistag.fpt.vn",
-		CustomerSop:       "http://customer-sopstg.ftel.scc",
-		Loyalty:           "https://stag-loyaltyapi.fpt.net",
+		//...
 	}
 }
 
 func InitAPIEndpoints() *ApiEndpoints {
 	endpoints := &ApiEndpoints{
-		HiFPTApi: GroupHiFPTApi{
-			NotifyTemplateByCustomerId: "/hi-notify-local-api/notification/webkit/send-notify-by-customer-id",
-			NotifyTemplateByContractNo: "/hi-notify-local-api/notification/send-notify-by-contract-no",
-			NotifyTemplateByPhone:      "/hi-notify-local-api/notification/send-notify-by-phone",
-			GameCompleteMission:        "/hi-ecom-game-v2-api/v1/games/complete-mision",
-			GetContracts:               "/hi-chat-api/v1/local/isc/chat-bot/get-contracts",
-			GetVoucherByProgramId:      "/hi-ecom-promotion-api/v1/promotion/receive-voucher-fr-program-id",
-			SendMailByTemplateId:       "/customer-provider/third-party/send-mail",
-			GetShopAddress:             "/hi-ftel-ecom-v2-api/v1/local/shop/get-address",
-		},
-		InSideAPI: GroupInSideAPI{
-			GetContractByContractNo: "/v2/GetContractByContractNo",
-			GetFeeAndLocalTypeNew:   "/cctelesaleswap/api/wifi6/GetFeeAndLocalTypeNew",
-			UpdatePortalObj:         "/cctelesaleswap/api/wifi6/UpdatePortalObj",
-			GetAuthenticate:         "/par-transition/identity/api/v1/authenticate",
-			GetSubteamInfo:          "/par-assignment/optimal-assign/gw/dating-ability/api/v1/OptimalAssign/get-subteam-id-main",
-			GetInfoAppointment1Day:  "/par-assignment/optimal-assign/gw/dating-ability/api/v1/DatingInfo/dating-get-info-Dep-1day",
-			GetInfoAppointment4Day:  "/par-assignment/optimal-assign/gw/dating-ability/api/v1/DatingInfo/dating-get-info-Dep-4day",
-			GetSwapContractByPhone:  "/cctelesaleswap/api/Info/get-swap-contract-info-by-phone",
-		},
-		HiPayment: GroupHiPaymentAPI{
-			PaymentOrderMerchant: "/payment-merchant/v1/pay-order-merchant",
-			UpdateResultDeal:     "/payment-merchant/provider/foxpay/deal-update",
-			RegisterAutoPay:      "/hi-payment-api/register-autopay",
-			DeleteAutoPay:        "/hi-payment-api/delete-autopay",
-		},
-		OnlineReceipt: GroupOnlineReceipt{
-			CreateDetail: "/api/v3/createdetails",
-			Payment:      "/api/v1/payment",
-		},
-		LocalNotiProvider: GroupLocalSendNoti{
-			ByPhone:    "/notify-provider/send-notify-by-phone",
-			ByContract: "/notify-provider/send-notify-by-contract",
-		},
-		HiCustomerProvider: GroupHiCustomerProvider{
-			CustomerInfo: "/customer-provider/third-party/customer-info",
-		},
-		CustomerSop: GroupCustomerSop{
-			SyncCustomer:      "/api/v2/customer/sync-customers-hifpt",
-			SyncCustomerWifi6: "/api/v2/customer/sync-customers-hifpt-trial-wifi6",
-		},
-		Loyalty: GroupLoyaltyApi{
-			GetToken:              "/auth/oauth/token",
-			CustomerInfo:          "/internal/api/customers/info",
-			VoucherAvailable:      "/internal/api/hifpt/customers/consume-coins/voucher-available",       // Danh sách voucher có thể sử dụng
-			VoucherExchanged:      "/internal/api/hifpt/customers/consume-coins/voucher-exchanged",       // Danh sách voucher đã đổi
-			VoucherExchange:       "/internal/api/hifpt/customers/consume-coins/voucher-exchange",        // Đổi điểm, đổi voucher
-			VoucherExchangeDetail: "/internal/api/hifpt/customers/consume-coins/voucher-exchange_detail", // Kiểm tra lai request đổi
-		},
+		HiFPTApi:  GroupHiFPTApi{},
+		InSideAPI: GroupInSideAPI{},
+
+		OnlineReceipt: GroupOnlineReceipt{},
 	}
 	return endpoints
-}
-
-func InitKeys(isProduction bool) *AppKeys {
-	keys := &AppKeys{
-		HIFPT_ECOM_CLIENT_KEY:   "hifpt_ecom",
-		HIFPT_ECOM_SECRET_KEY:   "xxxxxxecom2021",
-		NotifyTemplateClientKey: "ẻyerydbsdbfgsdfguweruwqere",
-		NotifyTemplateSecretKey: "iofgkcugysdpfekfdgdfgertxcvsdf",
-		ClientIdSercretKey: map[string]string{
-			"rtert345634erger64563": "346534gergdfgdfghdf",
-		},
-		TokenSecretKeyMiniApp: "45fgedfg45t645dfgđfasrshfgjhfgtw",
-		TOKEN_SECRET_KEY_APP:  "45dftfdgdffgdfgdgdfgdfqwerqwer",
-		TOKEN_SECRET_KEY_WEB:  "ư435erfdgdfyrterdfgasdwedqr",
-
-		TOKEN_SECRET_KEY_PORTAL: "345uwdgweugu23yqwiopqwheuguge", //
-		X_API_KEY_TELEGRAM:      "wi4y23tfwdadgfywegfyug",        //
-		TokenKeyHiChatBot:       "111229000-daa7-4128-8f1e-d022ebff3ba0",
-		TokenKeyHiBotTelegram:   "7973811607:AAEXPokFoDjZaGxu0YAhQQPk1ZGnwDj7YWQ", // token telegram
-		TOKEN_TELEGRAM:          "7521748926:AAG4MCZ0i0sB-uRP-tuAAViViAeD74kh9Rs",
-		NotifyProviderClientKey: "ẻyerydbsdbfgsdfguweruwqere",
-		CustomerSopClientKey: `-----BEGIN RSA PRIVATE KEY-----
-dfdgdfgdfgdfgdfgdfgdfgdfgdfgertertert
------END RSA PRIVATE KEY-----`,
-		HeaderAuthLoyalty:                   "aGlmcHQ6S09hRTZuelVpYmRnbmpHUVhiQnpPanhI",
-		HeaderAuthLoyaltyConsumeCoinsPhase2: "aGlmcHQtY29uc3VtZS1jb2lucy1waGFzZTI6NVMwNkYybmNDWndzOXkwUUFkMXQ0QlRRMDFHT3Y5bHE=",
-	}
-	if isProduction {
-		keys.HeaderAuthLoyalty = "aGlmcHQ6OXd2azM1YlNhc2FIWEJmVVRZSEZKeHZEbXUzNW1aQ3k="
-		keys.HeaderAuthLoyaltyConsumeCoinsPhase2 = "aGlmcHQ6OXd2azM1YlNhc2FIWEJmVVRZSEZKeHZEbXUzNW1aQ3k="
-	}
-	return keys
 }
 
 type TempLog struct{}

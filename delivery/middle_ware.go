@@ -5,8 +5,6 @@ import (
 	"ecom_promotion_v2/internal/models"
 	"ecom_promotion_v2/internal/utils"
 	"encoding/json"
-	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -95,27 +93,27 @@ func (s *appHandlers) RequireTokenWeb(ctx *fiber.Ctx) error {
 		}
 		return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
 	}
-	decodeToken, err := jwt.ParseWithClaims(token, clams, func(t *jwt.Token) (interface{}, error) {
-		return []byte(internal.Keys.TOKEN_SECRET_KEY_WEB), nil
-	})
-	if err != nil {
-		jwtErr := err.(*jwt.ValidationError).Errors
-		if jwtErr == jwt.ValidationErrorExpired {
-			resultFe = models.RespWeb{
-				Status: internal.SysStatus.TokenExpired.Status,
-				Msg:    internal.SysStatus.TokenExpired.Msg,
-			}
-			return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
-		}
-	}
+	// decodeToken, err := jwt.ParseWithClaims(token, clams, func(t *jwt.Token) (interface{}, error) {
+	// 	return []byte(internal.Keys.TOKEN_SECRET_KEY_WEB), nil
+	// })
+	// if err != nil {
+	// 	jwtErr := err.(*jwt.ValidationError).Errors
+	// 	if jwtErr == jwt.ValidationErrorExpired {
+	// 		resultFe = models.RespWeb{
+	// 			Status: internal.SysStatus.TokenExpired.Status,
+	// 			Msg:    internal.SysStatus.TokenExpired.Msg,
+	// 		}
+	// 		return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
+	// 	}
+	// }
 
-	if decodeToken == nil || !decodeToken.Valid {
-		resultFe = models.RespWeb{
-			Status: internal.SysStatus.InvalidToken.Status,
-			Msg:    internal.SysStatus.InvalidToken.Msg,
-		}
-		return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
-	}
+	// if decodeToken == nil || !decodeToken.Valid {
+	// 	resultFe = models.RespWeb{
+	// 		Status: internal.SysStatus.InvalidToken.Status,
+	// 		Msg:    internal.SysStatus.InvalidToken.Msg,
+	// 	}
+	// 	return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
+	// }
 
 	ctx.Locals("token_webkit", token)
 	ctx.Locals("customer_id", clams["customerId"])
@@ -141,26 +139,26 @@ func (s *appHandlers) RequireTokenLocal(ctx *fiber.Ctx) error {
 		}
 		return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
 	}
-	getToken := utils.CreateEcomToken(internal.Keys.HIFPT_ECOM_CLIENT_KEY, internal.Keys.HIFPT_ECOM_SECRET_KEY)
+	// getToken := utils.CreateEcomToken(internal.Keys.HIFPT_ECOM_CLIENT_KEY, internal.Keys.HIFPT_ECOM_SECRET_KEY)
 
-	if token != getToken {
-		detail := map[string]interface{}{}
-		if !internal.Envs.IsProduction {
-			detail["token"] = getToken
-		}
-		resultFe = models.RespLocal{
-			StatusCode: internal.SysStatus.InvalidToken.Status,
-			Message:    internal.SysStatus.InvalidToken.Msg,
-			Data:       detail,
-		}
-		return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
-	}
+	// if token != getToken {
+	// 	detail := map[string]interface{}{}
+	// 	if !internal.Envs.IsProduction {
+	// 		detail["token"] = getToken
+	// 	}
+	// 	resultFe = models.RespLocal{
+	// 		StatusCode: internal.SysStatus.InvalidToken.Status,
+	// 		Message:    internal.SysStatus.InvalidToken.Msg,
+	// 		Data:       detail,
+	// 	}
+	// 	return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
+	// }
 	return ctx.Next()
 }
 
 func (s *appHandlers) RequireTokenClient(ctx *fiber.Ctx) error {
 	token := string(ctx.Request().Header.Peek("TOKEN"))
-	clientID := string(ctx.Request().Header.Peek("CLIENT-ID"))
+	// clientID := string(ctx.Request().Header.Peek("CLIENT-ID"))
 	var body interface{}
 	ctx.BodyParser(&body)
 	internal.Log.Info("RequireTokenClient", zap.Any("ip", ctx.IP()), zap.Any("url", ctx.Context().URI()), zap.Any("authen", token))
@@ -171,26 +169,26 @@ func (s *appHandlers) RequireTokenClient(ctx *fiber.Ctx) error {
 		})
 	}
 	//check clientId valid
-	secretKey, ok := internal.Keys.ClientIdSercretKey[clientID]
-	if !ok {
-		internal.Log.Error("ClientId is not valid", zap.Any("clientId", clientID), zap.Any("clientData", internal.Keys.ClientIdSercretKey))
-		return ctx.Status(fiber.StatusBadRequest).JSON(models.RespLocal{
-			StatusCode: 400,
-			Message:    "ClientId không hợp lệ.",
-		})
-	}
-	getToken := utils.CreateEcomToken(clientID, secretKey)
-	if token != getToken {
-		detail := map[string]interface{}{}
-		if !internal.Envs.IsProduction {
-			detail["token"] = getToken
-		}
-		return ctx.Status(fiber.StatusBadRequest).JSON(models.RespLocal{
-			StatusCode: internal.SysStatus.InvalidToken.Status,
-			Message:    internal.SysStatus.InvalidToken.Msg,
-			Data:       detail,
-		})
-	}
+	// secretKey, ok := internal.Keys.ClientIdSercretKey[clientID]
+	// if !ok {
+	// 	internal.Log.Error("ClientId is not valid", zap.Any("clientId", clientID), zap.Any("clientData", internal.Keys.ClientIdSercretKey))
+	// 	return ctx.Status(fiber.StatusBadRequest).JSON(models.RespLocal{
+	// 		StatusCode: 400,
+	// 		Message:    "ClientId không hợp lệ.",
+	// 	})
+	// }
+	// getToken := utils.CreateEcomToken(clientID, secretKey)
+	// if token != getToken {
+	// 	detail := map[string]interface{}{}
+	// 	if !internal.Envs.IsProduction {
+	// 		detail["token"] = getToken
+	// 	}
+	// 	return ctx.Status(fiber.StatusBadRequest).JSON(models.RespLocal{
+	// 		StatusCode: internal.SysStatus.InvalidToken.Status,
+	// 		Message:    internal.SysStatus.InvalidToken.Msg,
+	// 		Data:       detail,
+	// 	})
+	// }
 	return ctx.Next()
 }
 
@@ -208,35 +206,35 @@ func (s *appHandlers) RequireTokenPortal(ctx *fiber.Ctx) error {
 	if utils.IsEmpty(token) {
 		return ctx.Status(fiber.StatusBadRequest).JSON(resultFe)
 	}
-	decodeToken, err := jwt.ParseWithClaims(token, clams, func(t *jwt.Token) (interface{}, error) {
-		return []byte(internal.Keys.TOKEN_SECRET_KEY_PORTAL), nil
-	})
+	// decodeToken, err := jwt.ParseWithClaims(token, clams, func(t *jwt.Token) (interface{}, error) {
+	// 	return []byte(internal.Keys.TOKEN_SECRET_KEY_PORTAL), nil
+	// })
 
-	if err != nil {
-		jwtErr := err.(*jwt.ValidationError).Errors
-		if jwtErr == jwt.ValidationErrorExpired {
-			resultFe = models.RespWeb{
-				Status: internal.CODE_TOKEN_EXPIRED,
-				Msg:    internal.MSG_TOKEN_EXPIRED,
-			}
-			return ctx.Status(fiber.StatusOK).JSON(resultFe)
-		}
-	}
+	// if err != nil {
+	// 	jwtErr := err.(*jwt.ValidationError).Errors
+	// 	if jwtErr == jwt.ValidationErrorExpired {
+	// 		resultFe = models.RespWeb{
+	// 			Status: internal.CODE_TOKEN_EXPIRED,
+	// 			Msg:    internal.MSG_TOKEN_EXPIRED,
+	// 		}
+	// 		return ctx.Status(fiber.StatusOK).JSON(resultFe)
+	// 	}
+	// }
 
-	if decodeToken == nil || !decodeToken.Valid {
-		resultFe = models.RespWeb{
-			Status: internal.CODE_INVALID_TOKEN,
-			Msg:    internal.MSG_INVALID_TOKEN,
-		}
-		return ctx.Status(fiber.StatusOK).JSON(resultFe)
-	}
+	// if decodeToken == nil || !decodeToken.Valid {
+	// 	resultFe = models.RespWeb{
+	// 		Status: internal.CODE_INVALID_TOKEN,
+	// 		Msg:    internal.MSG_INVALID_TOKEN,
+	// 	}
+	// 	return ctx.Status(fiber.StatusOK).JSON(resultFe)
+	// }
 	payload := models.PortalPayload{}
-	bytePortal, _ := json.Marshal(clams)
-	err = json.Unmarshal(bytePortal, &payload)
-	fmt.Println("payload:", payload)
-	if err != nil {
-		internal.Log.Error("Unmarshal", zap.Any("funcName", funcName), zap.Error(err))
-	}
+	// bytePortal, _ := json.Marshal(clams)
+	// err = json.Unmarshal(bytePortal, &payload)
+	// fmt.Println("payload:", payload)
+	// if err != nil {
+	// 	internal.Log.Error("Unmarshal", zap.Any("funcName", funcName), zap.Error(err))
+	// }
 
 	ctx.Locals("user_info", payload)
 	ctx.Locals("payload", payload)
@@ -273,14 +271,14 @@ func (s *appHandlers) RequireXKeyTelegramPortal(ctx *fiber.Ctx) error {
 	}
 
 	// Kiểm tra nếu API Key không hợp lệ
-	if xApiKey != internal.Keys.X_API_KEY_TELEGRAM {
-		internal.Log.Error(funcName, zap.String("error", "Invalid API Key"), zap.String("provided_key", xApiKey), zap.String("client_ip", ctx.IP()))
-		resultFe := models.RespWeb{
-			Status: internal.CODE_INVALID_TOKEN,
-			Msg:    "Invalid API Key",
-		}
-		return ctx.Status(fiber.StatusUnauthorized).JSON(resultFe)
-	}
+	// if xApiKey != internal.Keys.X_API_KEY_TELEGRAM {
+	// 	internal.Log.Error(funcName, zap.String("error", "Invalid API Key"), zap.String("provided_key", xApiKey), zap.String("client_ip", ctx.IP()))
+	// 	resultFe := models.RespWeb{
+	// 		Status: internal.CODE_INVALID_TOKEN,
+	// 		Msg:    "Invalid API Key",
+	// 	}
+	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(resultFe)
+	// }
 
 	// internal.Log.Info(funcName, zap.String("message", "API Key validated successfully"), zap.String("client_ip", ctx.IP()))
 
@@ -300,23 +298,23 @@ func (s *appHandlers) RequireTokenApp(ctx *fiber.Ctx) error {
 		internal.Log.Error("Empty token")
 		return ctx.Status(fiber.StatusOK).JSON(resultApp)
 	}
-	tokenStr := strings.Replace(token, "Bearer ", "", 1)
+	// tokenStr := strings.Replace(token, "Bearer ", "", 1)
 	_, err := s.rdb.Ping().Result()
 	if err != nil {
 		internal.Log.Error("Ping ", zap.Error(err), zap.Any("funcName", "RequireTokenApp"))
 		return ctx.JSON(resultApp)
 	}
-	clientId, token, errCore := s.VerifyTokenApp(tokenStr, internal.Keys.TOKEN_SECRET_KEY_APP)
-	if errCore != nil {
-		internal.Log.Error("VerifyTokenApp Error", zap.Any("tokenStr", tokenStr), zap.Error(err), zap.Any("funcName", "RequireTokenApp"))
-		return ctx.JSON(resultApp)
-	}
-	keyRedis := fmt.Sprintf("%s:%s", clientId, token)
-	dataRedis, _, errCore := s.GetDataRedisFrKey(keyRedis)
-	if errCore != nil {
-		internal.Log.Error("GetDataRedisFrKey Error", zap.Any("funcName", "RequireTokenApp"))
-		return ctx.JSON(resultApp)
-	}
+	// clientId, token, errCore := s.VerifyTokenApp(tokenStr, internal.Keys.TOKEN_SECRET_KEY_APP)
+	// if errCore != nil {
+	// 	internal.Log.Error("VerifyTokenApp Error", zap.Any("tokenStr", tokenStr), zap.Error(err), zap.Any("funcName", "RequireTokenApp"))
+	// 	return ctx.JSON(resultApp)
+	// }
+	// keyRedis := fmt.Sprintf("%s:%s", clientId, token)
+	// dataRedis, _, errCore := s.GetDataRedisFrKey(keyRedis)
+	// if errCore != nil {
+	// 	internal.Log.Error("GetDataRedisFrKey Error", zap.Any("funcName", "RequireTokenApp"))
+	// 	return ctx.JSON(resultApp)
+	// }
 	// dataRedis := &models.RedisModel{
 	// 	CustomerId: 123456,
 	// 	Phone:      "0982777935",
@@ -324,12 +322,12 @@ func (s *appHandlers) RequireTokenApp(ctx *fiber.Ctx) error {
 	// }
 	// tokenStr := "tokenApp"
 	// keyRedis := tokenStr
-	ctx.Locals("keyLimit", fmt.Sprintf("%v", dataRedis.CustomerId))
-	ctx.Locals("customer_id", fmt.Sprintf("%v", dataRedis.CustomerId))
-	ctx.Locals("customer_phone", fmt.Sprintf("%v", dataRedis.Phone))
-	ctx.Locals("app_version", dataRedis.AppVersion)
-	ctx.Locals("token_app", tokenStr)
-	internal.Log.Info("RequireTokenApp", zap.Any("keyRedis", keyRedis), zap.Any("dataRedis", dataRedis))
+	// ctx.Locals("keyLimit", fmt.Sprintf("%v", dataRedis.CustomerId))
+	// ctx.Locals("customer_id", fmt.Sprintf("%v", dataRedis.CustomerId))
+	// ctx.Locals("customer_phone", fmt.Sprintf("%v", dataRedis.Phone))
+	// ctx.Locals("app_version", dataRedis.AppVersion)
+	// ctx.Locals("token_app", tokenStr)
+	// internal.Log.Info("RequireTokenApp", zap.Any("keyRedis", keyRedis), zap.Any("dataRedis", dataRedis))
 	return ctx.Next()
 }
 func (a *appHandlers) VerifyTokenApp(tokenApp string, secretKey string) (string, string, *internal.SystemStatus) {
