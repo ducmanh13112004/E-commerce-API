@@ -48,14 +48,13 @@ var rootCmd = &cobra.Command{
 		// utils_call.UploadFramedImage("test.jpg", "9291918.png", "output/output.png", "miniotests")
 
 		repositories := repositories.NewRepositories(internal.Db.Debug())
-		rdbToken := internal.NewConnectRedis()
-		rdbCache := internal.NewConnectRedisCache()
+
 		fmt.Println("INIT SERVICE...")
 		// Init service
 		// Compose into one app service
-		appSvcs := services.NewAppServices(repositories, rdbToken, rdbCache)
+		appSvcs := services.NewAppServices(repositories)
 		// Init handler
-		appHandler := delivery.NewAppHandlers(appSvcs, rdbToken)
+		appHandler := delivery.NewAppHandlers(appSvcs)
 
 		models.Validate = validator.New()
 		// Hẹn lịch lại các deal sau khi chạy lại service
@@ -82,7 +81,6 @@ var rootCmd = &cobra.Command{
 		fmt.Println("INIT ROUTE")
 		// * Serve APIs
 
-		AppServer.Get("/hi-ecom-promotion-v2-api/health", appHandler.Health)
 		AppServer.Get("/hi-ecom-promotion-v2-api/metrics", monitor.New())
 		AppServer.Use(fiber_pprof.New(fiber_pprof.Config{Prefix: "/hi-ecom-promotion-v2-api"}))
 		AppServer.Post("/hi-ecom-promotion-v2-api/v1/test-api", TestAPI)
@@ -111,45 +109,45 @@ var rootCmd = &cobra.Command{
 }
 
 func CategoryProgramGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/on-off-program-category", appHandler.RequireTokenPortal, appHandler.OnOffProgramCategoryListAllHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-list-all", appHandler.RequireTokenPortal, appHandler.GetProgramCategoryListAllHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-list-on", appHandler.RequireTokenPortal, appHandler.GetProgramCategoryHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-add", appHandler.RequireTokenPortal, appHandler.CreateProgramCategory)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-update", appHandler.RequireTokenPortal, appHandler.UpdateProgramCategory)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-delete", appHandler.RequireTokenPortal, appHandler.DeleteProgramCategory)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/on-off-program-category", appHandler.RequireTokenLocal, appHandler.OnOffProgramCategoryListAllHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-list-all", appHandler.RequireTokenLocal, appHandler.GetProgramCategoryListAllHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-list-on", appHandler.RequireTokenLocal, appHandler.GetProgramCategoryHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-add", appHandler.RequireTokenLocal, appHandler.CreateProgramCategory)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-update", appHandler.RequireTokenLocal, appHandler.UpdateProgramCategory)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/program-category-delete", appHandler.RequireTokenLocal, appHandler.DeleteProgramCategory)
 	return AppServer
 }
 
 func CategoryGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
 	//khai báo CreateCategory trong app_handlers để sử dụng
 
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-list", appHandler.RequireTokenPortal, appHandler.GetCategoryListHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-add", appHandler.RequireTokenPortal, appHandler.CreateCategory)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-update", appHandler.RequireTokenPortal, appHandler.UpdateCategory)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-delete", appHandler.RequireTokenPortal, appHandler.DeleteCategory)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-list-name", appHandler.RequireTokenPortal, appHandler.GetCategoryListNameHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-list", appHandler.RequireTokenLocal, appHandler.GetCategoryListHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-add", appHandler.RequireTokenLocal, appHandler.CreateCategory)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-update", appHandler.RequireTokenLocal, appHandler.UpdateCategory)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-delete", appHandler.RequireTokenLocal, appHandler.DeleteCategory)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/category/category-list-name", appHandler.RequireTokenLocal, appHandler.GetCategoryListNameHandler)
 	return AppServer
 }
 func ProgramDirectGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-add", appHandler.RequireTokenPortal, appHandler.CreateProgramDirect)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-list", appHandler.RequireTokenPortal, appHandler.GetProgramDirectListAllHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-list-ID", appHandler.RequireTokenPortal, appHandler.GetProgramDirectIDHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-Update", appHandler.RequireTokenPortal, appHandler.UpdateProgramDirect)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-On-Off-State", appHandler.RequireTokenPortal, appHandler.DeleteProgramDirect)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-add", appHandler.RequireTokenLocal, appHandler.CreateProgramDirect)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-list", appHandler.RequireTokenLocal, appHandler.GetProgramDirectListAllHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-list-ID", appHandler.RequireTokenLocal, appHandler.GetProgramDirectIDHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-Update", appHandler.RequireTokenLocal, appHandler.UpdateProgramDirect)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/ProgramDirect/ProgramDirect-On-Off-State", appHandler.RequireTokenLocal, appHandler.DeleteProgramDirect)
 	return AppServer
 }
 
 // update api theo bảng db mới!
 func ProgramDirectUpdateGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-list-name", appHandler.RequireTokenPortal, appHandler.GetProgramRedirectListNameAllHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-add", appHandler.RequireTokenPortal, appHandler.CreateProgramRedirectHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-list", appHandler.RequireTokenPortal, appHandler.GetProgramRedirectListAllHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-list-id", appHandler.RequireTokenPortal, appHandler.GetProgramRedirectIDHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-update", appHandler.RequireTokenPortal, appHandler.UpdateProgramRedirectHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-on-off-state", appHandler.RequireTokenPortal, appHandler.DeleteProgramRedirectHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/get-program-list-navigation", appHandler.RequireTokenPortal, appHandler.GetProgramListNavigationHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/getprogramlistnavigationcreate", appHandler.RequireTokenPortal, appHandler.CreateProgramNavigationHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/getprogramlistnavigationupdate", appHandler.RequireTokenPortal, appHandler.UpdateProgramNavigationHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-list-name", appHandler.RequireTokenLocal, appHandler.GetProgramRedirectListNameAllHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-add", appHandler.RequireTokenLocal, appHandler.CreateProgramRedirectHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-list", appHandler.RequireTokenLocal, appHandler.GetProgramRedirectListAllHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-list-id", appHandler.RequireTokenLocal, appHandler.GetProgramRedirectIDHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-update", appHandler.RequireTokenLocal, appHandler.UpdateProgramRedirectHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/program-direct-on-off-state", appHandler.RequireTokenLocal, appHandler.DeleteProgramRedirectHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/get-program-list-navigation", appHandler.RequireTokenLocal, appHandler.GetProgramListNavigationHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/getprogramlistnavigationcreate", appHandler.RequireTokenLocal, appHandler.CreateProgramNavigationHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-direct-update-group/getprogramlistnavigationupdate", appHandler.RequireTokenLocal, appHandler.UpdateProgramNavigationHandler)
 	return AppServer
 }
 func PromotionsGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
@@ -162,16 +160,16 @@ func PromotionsGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fib
 }
 
 func ProgramPromotionGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-program-promotion-list", appHandler.RequireTokenPortal, appHandler.GetProgramPromotionListHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-program-promotion-by-id", appHandler.RequireTokenPortal, appHandler.GetProgramPromotionByIDHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/create-program-promotion", appHandler.RequireTokenPortal, appHandler.CreateProgramPromotionHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/update-program-promotion", appHandler.RequireTokenPortal, appHandler.UpdateProgramPromotionHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/on-off-program-promotion", appHandler.RequireTokenPortal, appHandler.OnOffProgramPromotionHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/delete-program-promotion", appHandler.RequireTokenPortal, appHandler.DeleteProgramPromotionHandler)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-report-program-promotion", appHandler.RequireTokenPortal, appHandler.GetReportProgramPromotionHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-program-promotion-list", appHandler.RequireTokenLocal, appHandler.GetProgramPromotionListHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-program-promotion-by-id", appHandler.RequireTokenLocal, appHandler.GetProgramPromotionByIDHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/create-program-promotion", appHandler.RequireTokenLocal, appHandler.CreateProgramPromotionHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/update-program-promotion", appHandler.RequireTokenLocal, appHandler.UpdateProgramPromotionHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/on-off-program-promotion", appHandler.RequireTokenLocal, appHandler.OnOffProgramPromotionHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/delete-program-promotion", appHandler.RequireTokenLocal, appHandler.DeleteProgramPromotionHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-report-program-promotion", appHandler.RequireTokenLocal, appHandler.GetReportProgramPromotionHandler)
 	//Promotion code
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/promotion/create-promotion", appHandler.RequireTokenPortal, appHandler.CreatePromotion)
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/promotion/get-promotion", appHandler.RequireTokenPortal, appHandler.GetPromotionByProgramId)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/promotion/create-promotion", appHandler.RequireTokenLocal, appHandler.CreatePromotion)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/promotion/get-promotion", appHandler.RequireTokenLocal, appHandler.GetPromotionByProgramId)
 
 	//Call local
 	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-promotion/get-report-program-promotion-local", appHandler.RequireTokenLocal, appHandler.GetReportProgramPromotionLocalHandler)
@@ -181,7 +179,7 @@ func ProgramPromotionGroup(AppServer *fiber.App, appHandler delivery.AppHandlers
 }
 
 func ProgramProductGroup(AppServer *fiber.App, appHandler delivery.AppHandlers) *fiber.App {
-	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-product/create-list-sku", appHandler.RequireTokenPortal, appHandler.CreateListSkuHandler)
+	AppServer.Post("/hi-ecom-promotion-v2-api/v1/program-product/create-list-sku", appHandler.RequireTokenLocal, appHandler.CreateListSkuHandler)
 	return AppServer
 }
 
