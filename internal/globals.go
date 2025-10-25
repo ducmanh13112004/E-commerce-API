@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis"
 	"github.com/go-resty/resty/v2"
 	"github.com/segmentio/kafka-go"
 	"github.com/shettyh/threadpool"
@@ -26,28 +25,27 @@ import (
 )
 
 var (
-	Envs        = InitEnvVars()
-	SysStatus   = InitSystemStatus()
-	Log         = TempLog{}
-	Logger      = NewLogger()
-	Db          = NewSQLDB()
-	redisClient = NewConnectRedis()
+	Envs      = InitEnvVars()
+	SysStatus = InitSystemStatus()
+	Log       = TempLog{}
+	Logger    = NewLogger()
+	Db        = NewSQLDB()
 )
 
 var (
-	Domains            = InitAPIDomains(Envs.IsProduction)
-	Eps                = InitAPIEndpoints()
-	Keys               = (Envs.IsProduction)
-	Pool               = NewThreadPool()
-	PoolLog            = NewThreadPool()
-	RedisCache         = NewConnectRedisCache()
+	Domains = InitAPIDomains(Envs.IsProduction)
+	Eps     = InitAPIEndpoints()
+	Keys    = InitAppKeys()
+	Pool    = NewThreadPool()
+	PoolLog = NewThreadPool()
+
 	Brokers            = NewBrokers(Envs.IsProduction)
 	KafkaTopicName     = NewKafkaTopicName(Envs.IsProduction)
 	KafkaTopicPartner  = NewKafkaTopicPartner(Envs.IsProduction)
 	KafkaTopicNameAll  = NewKafkaTopicNameAll(Envs.IsProduction)
 	FROM_EMAIL         = "...."
 	URL_SEND_MAIL_SMTP = "....."
-	ServiceName        = "hi-ecom-promotion-v2-api"
+	ServiceName        = "ecom-promotion-v2-api"
 )
 
 const (
@@ -89,23 +87,8 @@ func (c contextKey) String() string {
 }
 
 type AppKeys struct {
-	X_API_KEY_TELEGRAM                  string
-	TOKEN_SECRET_KEY_APP                string
-	TOKEN_SECRET_KEY_WEB                string
-	TOKEN_SECRET_KEY_PORTAL             string
-	HIFPT_ECOM_CLIENT_KEY               string
-	HIFPT_ECOM_SECRET_KEY               string
-	NotifyTemplateClientKey             string
-	NotifyTemplateSecretKey             string
-	ClientIdSercretKey                  map[string]string // cặp khóa client id và secret key
-	TokenSecretKeyMiniApp               string
-	TokenKeyHiChatBot                   string
-	TokenKeyHiBotTelegram               string
-	TOKEN_TELEGRAM                      string
-	NotifyProviderClientKey             string
-	CustomerSopClientKey                string
-	HeaderAuthLoyalty                   string
-	HeaderAuthLoyaltyConsumeCoinsPhase2 string
+	LOCAL_ECOM_CLIENT_KEY string
+	LOCAL_ECOM_SECRET_KEY string
 }
 type EnvVars struct {
 	SqlHost      string `mapstructure:"DB_HOST"`
@@ -121,61 +104,17 @@ type EnvVars struct {
 	RedisDb      int    `mapstructure:"REDIS_DB"`
 }
 type ApiDomains struct {
-	HiFPT              string
-	HiFptNet           string
-	HiFPTWebkit        string
-	HiURLNotify        string
-	ShoppingV1         string
-	Billing            string
-	Promotion          string
-	HiPayment          string
-	OnlineReceipt      string
-	FPTPayment         string
-	LocalNotiProvider  string
-	HrAPI              string
-	HiCustomerProvider string
-	CustomerSop        string
-	Loyalty            string
-}
-type GroupHiFPTApi struct {
-	NotifyTemplateByCustomerId string
-	NotifyTemplateByContractNo string
-	NotifyTemplateByPhone      string
-	GameCompleteMission        string // Cập nhập trạng thái hoàn thành nhiệm vụ
-	GetContracts               string
-	GetVoucherByProgramId      string // Lấy thông tin voucher theo mã chương trình
-	SendMailByTemplateId       string // /customer-provider/third-party/send-mail
-	GetShopAddress             string // Lấy địa chỉ shop khách hàng quét qr nhân viên
-}
-type GroupInSideAPI struct {
-	GetContractByContractNo string // lấy thông tin hợp đồng từ mã hợp đồng
-	GetFeeAndLocalTypeNew   string // Lấy thông tin phí swap wifi 6
-	UpdatePortalObj         string // cập nhập kết quả thanh toán deal
-	// Lấy năng lực hẹn
-	GetAuthenticate        string // lấy token
-	GetSubteamInfo         string // Lấy thông tin sub team
-	GetInfoAppointment1Day string // Lấy năng lực hẹn 1 ngày
-	GetInfoAppointment4Day string // Lấy năng lực hẹn 4 ngày
-	GetSwapContractByPhone string // Lấy thông tin swap wifi 6 của các hợp đồng từ SDT
-}
-type GroupHiPaymentAPI struct {
-	PaymentOrderMerchant string
-	UpdateResultDeal     string
-	RegisterAutoPay      string
-	DeleteAutoPay        string
-}
-type GroupOnlineReceipt struct {
-	CreateDetail string // Tao khoan thu
-	Payment      string // gạch khoản thu
-}
-type GroupLocalSendNoti struct {
-	ByPhone    string
-	ByContract string
-	ByCustomer string
-}
-type GroupHiCustomerProvider struct {
-	CustomerInfo       string
-	GetContractByPhone string
+	ShoppingV1 string
+	Billing    string
+	Promotion  string
+
+	OnlineReceipt     string
+	FPTPayment        string
+	LocalNotiProvider string
+	HrAPI             string
+
+	CustomerSop string
+	Loyalty     string
 }
 
 type GroupCustomerSop struct {
@@ -191,16 +130,31 @@ type GroupLoyaltyApi struct {
 	VoucherExchangeDetail string
 }
 type ApiEndpoints struct {
-	HiFPTApi  GroupHiFPTApi
-	InSideAPI GroupInSideAPI
-
-	OnlineReceipt      GroupOnlineReceipt
-	LocalNotiProvider  GroupLocalSendNoti
-	HiCustomerProvider GroupHiCustomerProvider
-	CustomerSop        GroupCustomerSop
-	Loyalty            GroupLoyaltyApi
+	CustomerSop GroupCustomerSop
+	Loyalty     GroupLoyaltyApi
 }
 
+// Khởi tạo các API keys từ biến môi trường
+func InitAppKeys() *AppKeys {
+	fmt.Println("LOADING APP KEYS...")
+	keys := &AppKeys{}
+
+	// Đọc từ biến môi trường
+	viper.BindEnv("LOCAL_ECOM_CLIENT_KEY")
+	viper.BindEnv("LOCAL_ECOM_SECRET_KEY")
+	// Thêm các keys khác nếu cần
+
+	if err := viper.Unmarshal(keys); err != nil {
+		fmt.Println("Error loading app keys:", err)
+		fmt.Println("LOADING APP KEYS FAILED")
+	}
+
+	fmt.Println("LOADING APP KEYS SUCCESS")
+	return keys
+}
+
+// Khởi tạo các trạng thái hệ thống với mã lỗi và message tương ứng
+// Định nghĩa các response code chuẩn cho ứng dụng
 func InitSystemStatus() *AllSystemStatus {
 	return &AllSystemStatus{
 		DbFailed: &SystemStatus{
@@ -283,6 +237,7 @@ func DB(funcName string) *gorm.DB {
 	return Db.WithContext(ctx)
 }
 
+// Tạo logger sử dụng zap, cấu hình output ra stdout với format JSON
 func NewLogger() *zap.Logger {
 	// Log vào stdOut
 	writeSyncer := zapcore.AddSync(os.Stdout)
@@ -297,6 +252,7 @@ func logEndcoder() zapcore.Encoder {
 	return zapcore.NewJSONEncoder(encodeConfig)
 }
 
+// Khởi tạo thread pool với 50 worker và queue size 100,000
 func NewThreadPool() *threadpool.ThreadPool {
 	fmt.Println("LOADING THREAD POOL ...")
 	threadPool := threadpool.NewThreadPool(50, 100000)
@@ -307,6 +263,8 @@ func NewThreadPool() *threadpool.ThreadPool {
 	return threadPool
 }
 
+// Khởi tạo và load các biến môi trường từ file app.env hoặc system env
+// Sử dụng viper để đọc config, fallback sang system env nếu không tìm thấy file
 func InitEnvVars() *EnvVars {
 	fmt.Println("LOADING ENVS...")
 	envs := &EnvVars{}
@@ -334,6 +292,8 @@ func InitEnvVars() *EnvVars {
 	return envs
 }
 
+// Khởi tạo kết nối MySQL database sử dụng GORM
+// Cấu hình connection pool với các thông số tối ưu
 func NewSQLDB() *gorm.DB {
 	fmt.Println("LOADING MYSQL DB ...")
 	DBDSN := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&interpolateParams=true",
@@ -366,6 +326,7 @@ func NewSQLDB() *gorm.DB {
 	return gormDB
 }
 
+// Lấy instance database với context chứa tên function để logging
 func CheckSQLDB() (*gorm.DB, error) {
 	fmt.Println("LOADING MYSQL DB ...")
 	DBDSN := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&interpolateParams=true",
@@ -394,60 +355,6 @@ func CheckSQLDB() (*gorm.DB, error) {
 	}
 	fmt.Println("LOADING MYSQL DB SUCCESS...")
 	return gormDB, nil
-}
-
-func NewConnectRedis() *redis.Client {
-	fmt.Println("NewConnectRedis start...")
-	client := redis.NewClient(&redis.Options{
-		Addr:     "...",
-		Password: "....", // no password set
-		DB:       15,     // use default DB
-	})
-	fmt.Println("NewConnectRedis SUCCESS")
-	return client
-}
-
-// func NewConnectRedisCache() *redis.Client {
-// 	fmt.Println("NewConnectRedisCache start...")
-// 	defer fmt.Println("NewConnectRedisCache SUCCESS")
-// 	if Envs.IsDev {
-// 		client := redis.NewClient(&redis.Options{
-// 			Addr: "localhost:6379",
-// 			DB:   0,
-// 		})
-// 		return client
-// 	}
-// 	if Envs.IsProduction {
-// 		client := redis.NewClient(&redis.Options{
-// 			Addr: "hi-ecom-redis-cache:6379",
-// 			DB:   1,
-// 		})
-// 		return client
-// 	}
-
-//		client := redis.NewClient(&redis.Options{
-//			Addr: "hi-ecom-redis-cache-staging:6379",
-//			DB:   1,
-//		})
-//		return client
-//	}
-func NewConnectRedisCache() *redis.Client {
-	Log.Info("NewConnectRedisCache start...")
-	add := "hi-ecom-redis-cache-staging-master:6379"
-	if Envs.IsDev {
-		add = "localhost:6379"
-	} else {
-		add = fmt.Sprintf("%v:%v", Envs.RedisHost, Envs.RedisPort)
-	}
-	client := redis.NewClient(&redis.Options{
-		Addr:       add,
-		DB:         0,
-		MaxRetries: 3,
-		// PoolSize:   100,
-	})
-	test, err := client.Ping().Result()
-	Log.Info("NewConnectRedisCache", zap.Any("add", add), zap.Any("db", 0), zap.Any("result", test), zap.Error(err))
-	return client
 }
 
 func NewBrokers(useProduction bool) []string {
@@ -484,12 +391,7 @@ func InitAPIDomains(isProduction bool) *ApiDomains {
 }
 
 func InitAPIEndpoints() *ApiEndpoints {
-	endpoints := &ApiEndpoints{
-		HiFPTApi:  GroupHiFPTApi{},
-		InSideAPI: GroupInSideAPI{},
-
-		OnlineReceipt: GroupOnlineReceipt{},
-	}
+	endpoints := &ApiEndpoints{}
 	return endpoints
 }
 
@@ -620,17 +522,6 @@ func ZapFieldToMap(logLevel, msg string, caller interface{}, fields ...zapcore.F
 	return Message
 }
 
-// func (TempLog) Debug(msg string, fields ...zap.Field) {
-// 	pc, file, line, _ := runtime.Caller(1)
-// 	fn := runtime.FuncForPC(pc)
-// 	listString := strings.Split(file, ServiceName+"/")
-// 	file = shortCaller(listString[len(listString)-1])
-// 	fields = append(fields, zap.Any("caller", fmt.Sprintf("%v %v:%v", shortFuncNameCaller(fn.Name()), file, line)))
-// 	Logger.Debug(msg, fields...)
-// 	fmt.Println()
-// 	SendLogToKibana("DEBUG", msg, fields...)
-// }
-
 func shortCaller(caller string) string {
 	if strings.Contains(caller, "cmd/") {
 		caller = strings.Split(caller, "cmd/")[1]
@@ -714,12 +605,15 @@ func (c *CustomLogger) Trace(ctx context.Context, begin time.Time, fc func() (sq
 	}
 }
 
+// Convert interface thành byte array sử dụng JSON encoding
 func ToByte(a interface{}) []byte {
 	buffers := new(bytes.Buffer)
 	json.NewEncoder(buffers).Encode(a)
 	return buffers.Bytes()
 }
 
+// Gửi log đến hệ thống Kibana thông qua Kafka
+// Chỉ hoạt động trong môi trường không phải dev
 func SendLogToKibana(logLevel, msg string, caller interface{}, fields ...zapcore.Field) {
 	if Envs.IsDev {
 		return
@@ -757,6 +651,8 @@ func GetTimeUTC7() time.Time {
 	return now.In(loc)
 }
 
+// Log các request đến third-party APIs với đầy đủ thông tin:
+// headers, body, response, timing, errors
 func SendLogPartner(url string, headers map[string]string, body map[string]interface{}, resp *resty.Response, errCall error, status *int, startCall time.Time, endCall time.Time, funcName string) {
 	if Envs.IsDev {
 		return
