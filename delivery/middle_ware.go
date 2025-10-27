@@ -5,10 +5,8 @@ import (
 	"ecom_promotion_v2/internal/models"
 	"ecom_promotion_v2/internal/utils"
 	"sync"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 )
@@ -27,52 +25,6 @@ func getVisitor(ip string, limit int) *rate.Limiter {
 	}
 
 	return limiter
-}
-func (s *appHandlers) RateLimit(ctx *fiber.Ctx) error {
-	// customer_id := ctx.Locals("customer_id").(string)
-	// limiter := getVisitor(customer_id, 10)
-	// if !limiter.Allow() {
-	// 	internal.Log.Info("Rate limit", zap.Any("Customer_id", customer_id))
-	// 	return ctx.Status(fiber.StatusOK).JSON(models.RespWeb{
-	// 		Status: internal.SysStatus.RateLimit.Status,
-	// 		Msg:    internal.SysStatus.RateLimit.Msg,
-	// 	})
-	// }
-	return ctx.Next()
-}
-
-func (s *appHandlers) CustomRateLimit(ctx *fiber.Ctx) error {
-	customer_id := ctx.Locals("customer_id").(string)
-	limiter := getVisitor(customer_id, 30)
-	if !limiter.Allow() {
-		internal.Log.Info("Rate limit", zap.Any("Customer_id", customer_id))
-		return ctx.Status(fiber.StatusOK).JSON(models.RespWeb{
-			Status: internal.SysStatus.RateLimit.Status,
-			Msg:    internal.SysStatus.RateLimit.Msg,
-		})
-	}
-	return ctx.Next()
-}
-func (s *appHandlers) FiberRateLimit(maxRequests int, duration time.Duration) fiber.Handler {
-	return limiter.New(limiter.Config{
-		Max:        maxRequests,
-		Expiration: duration,
-		LimitReached: func(c *fiber.Ctx) error {
-			return c.Status(fiber.StatusOK).JSON(models.RespWeb{
-				Status: internal.SysStatus.RateLimit.Status,
-				Msg:    internal.SysStatus.RateLimit.Msg,
-			})
-		},
-		KeyGenerator: func(c *fiber.Ctx) string {
-			customerID := c.Locals("customer_id").(string)
-
-			if customerID == "" {
-				// Fallback to IP or reject
-				customerID = c.IP()
-			}
-			return "rate_limit_customer_" + customerID
-		},
-	})
 }
 func (s *appHandlers) RequireTokenLocal(ctx *fiber.Ctx) error {
 	token := string(ctx.Request().Header.Peek("TOKEN"))

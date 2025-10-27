@@ -1,0 +1,53 @@
+#khai baos version (3.8 ho tro nhieu tinh nang nhat)
+version: '3.8'
+# Service: API (Ứng dụng chính)
+services:
+  api:
+    build: .
+    # Đặt cho container là ecommerce_api
+    container_name: ecommerce_api
+    # Map port 8080 từ host sang port 8080 của container
+    # Định dạng: "host_port:container_port"
+    ports: -"8080:8080"
+    # Load biến môi trường từ file app.env
+    env_file:
+      - app.env
+
+    # Service api phụ thuộc vào service db
+    # Đảm bảo container db khởi động trước container api
+    depends_on:
+      - db
+    db:
+      image: mysql:8.0
+      #Đặt tên container database là ecommerce_db
+      container_name: ecommerce_db
+      # Tự động restart container nếu nó dừng
+      # Hữu ích cho service database cần luôn sẵn sàng
+      restart: always
+
+      # Thiết lập biến môi trường cho MySQL:
+      # Password cho user root
+      # Tạo database tên ecommerce
+      # Tạo user user với password password
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: ecommerce
+        MYSQL_USER: user
+        MYSQL_PASSWORD: password
+      # Map port 3306 (MySQL) từ host sang container
+      # Cho phép kết nối trực tiếp đến database từ host
+      port:
+        - "3306:3306"
+
+# Luồng hoạt động
+# Khởi động: docker-compose up
+
+# Build image cho service api từ Dockerfile
+
+# Pull image mysql:8.0 cho service db
+
+# Start container ecommerce_db trước (do depends_on)
+
+# Start container ecommerce_api sau
+
+# Kết nối mạng: Cả 2 service cùng mạng, có thể giao tiếp qua tên service

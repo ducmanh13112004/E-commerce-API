@@ -305,9 +305,9 @@ func NewSQLDB() *gorm.DB {
 		fmt.Println("NewSQLDB", err)
 		return nil
 	}
-	DB.SetConnMaxLifetime(time.Minute * 10)
-	DB.SetMaxOpenConns(1000)
-	DB.SetMaxIdleConns(1000)
+	DB.SetConnMaxLifetime(time.Minute * 10) //Connection pool trong Go(Mỗi connection trong pool sẽ bị đóng sau 10 phút tránh connection bị già )
+	DB.SetMaxOpenConns(1000)                //Connection pool trong Go(Tối đa 1000 connection cùng lúc đến database.)
+	DB.SetMaxIdleConns(1000)                //Connection pool trong Go(Giữ lại 1000 connection sẵn sàng, không đóng chúng.)
 	errPing := DB.Ping()
 	if errPing != nil {
 		fmt.Println("DB PING ERR: ", errPing)

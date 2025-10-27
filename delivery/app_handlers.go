@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"ecom_promotion_v2/internal/services"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,7 +11,6 @@ type AppHandlers interface {
 	RequireTokenLocal(*fiber.Ctx) error
 	RequireXKeyTelegramPortal(*fiber.Ctx) error
 	// RequireTokenApp(ctx *fiber.Ctx) error
-	FiberRateLimit(maxRequests int, duration time.Duration) fiber.Handler
 	PromotionsHandlers
 	CategoryHandlers
 	ProgramPromotionHandler
